@@ -52,6 +52,7 @@ public struct ButtonBarPagerTabStripSettings {
         public var selectedBarHeight: CGFloat = 5
         public var selectedBarAlignment: SelectedBarAlignment = .center
         public var selectedBarVerticalAlignment: SelectedBarVerticalAlignment = .bottom
+        public var selectedBarShouldFillAvailableWidth = true
 
         public var buttonBarItemBackgroundColor: UIColor?
         public var buttonBarItemFont = UIFont.systemFont(ofSize: 18)
@@ -189,7 +190,7 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
         // When the view first appears or is rotated we also need to ensure that the barButtonView's
         // selectedBar is resized and its contentOffset/scroll is set correctly (the selected
         // tab/cell may end up either skewed or off screen after a rotation otherwise)
-        buttonBarView.moveTo(index: currentIndex, animated: false, swipeDirection: .none, pagerScroll: .scrollOnlyIfOutOfScreen)
+        buttonBarView.moveTo(index: currentIndex, animated: false, swipeDirection: .none, pagerScroll: .scrollOnlyIfOutOfScreen, minimumWidth: calculateMinimumWidth(index: currentIndex))
         buttonBarView.selectItem(at: IndexPath(item: currentIndex, section: 0), animated: false, scrollPosition: [])
     }
 
@@ -200,7 +201,7 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
         guard isViewLoaded else { return }
         buttonBarView.reloadData()
         cachedCellWidths = calculateWidths()
-        buttonBarView.moveTo(index: currentIndex, animated: false, swipeDirection: .none, pagerScroll: .yes)
+        buttonBarView.moveTo(index: currentIndex, animated: false, swipeDirection: .none, pagerScroll: .yes, minimumWidth: calculateMinimumWidth(index: currentIndex))
     }
 
     open func calculateStretchedCellWidths(_ minimumCellWidths: [CGFloat], suggestedStretchedCellWidth: CGFloat, previousNumberOfLargeCells: Int) -> CGFloat {
@@ -227,7 +228,7 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
 
     open func updateIndicator(for viewController: PagerTabStripViewController, fromIndex: Int, toIndex: Int) {
         guard shouldUpdateButtonBarView else { return }
-        buttonBarView.moveTo(index: toIndex, animated: false, swipeDirection: toIndex < fromIndex ? .right : .left, pagerScroll: .yes)
+        buttonBarView.moveTo(index: toIndex, animated: false, swipeDirection: toIndex < fromIndex ? .right : .left, pagerScroll: .yes, minimumWidth: calculateMinimumWidth(index: toIndex))
 
         if let changeCurrentIndex = changeCurrentIndex {
             let oldIndexPath = IndexPath(item: currentIndex != fromIndex ? fromIndex : toIndex, section: 0)
@@ -283,7 +284,7 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
     open func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard indexPath.item != currentIndex else { return }
 
-        buttonBarView.moveTo(index: indexPath.item, animated: true, swipeDirection: .none, pagerScroll: .yes)
+        buttonBarView.moveTo(index: indexPath.item, animated: true, swipeDirection: .none, pagerScroll: .yes, minimumWidth: calculateMinimumWidth(index: indexPath.item))
         shouldUpdateButtonBarView = false
 
         let oldIndexPath = IndexPath(item: currentIndex, section: 0)
@@ -358,6 +359,25 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
     }
 
     open func configureCell(_ cell: ButtonBarViewCell, indicatorInfo: IndicatorInfo) {
+    }
+    
+    private func calculateMinimumWidth(index: Int) -> CGFloat? {
+        if viewControllers.count > index &&
+            settings.style.selectedBarShouldFillAvailableWidth == false {
+            let viewController = viewControllers[index]
+            let childController = viewController as! IndicatorInfoProvider // swiftlint:disable:this force_cast
+            let indicatorInfo = childController.indicatorInfo(for: self)
+            switch buttonBarItemSpec! {
+            case .cellClass(let widthCallback):
+                let width = widthCallback(indicatorInfo)
+                return width
+            case .nibFile(_, _, let widthCallback):
+                let width = widthCallback(indicatorInfo)
+                return width
+            }
+        }
+        
+        return nil
     }
 
     private func calculateWidths() -> [CGFloat] {

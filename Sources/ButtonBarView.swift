@@ -70,9 +70,9 @@ open class ButtonBarView: UICollectionView {
         addSubview(selectedBar)
     }
 
-    open func moveTo(index: Int, animated: Bool, swipeDirection: SwipeDirection, pagerScroll: PagerScroll) {
+    open func moveTo(index: Int, animated: Bool, swipeDirection: SwipeDirection, pagerScroll: PagerScroll, minimumWidth: CGFloat? = nil) {
         selectedIndex = index
-        updateSelectedBarPosition(animated, swipeDirection: swipeDirection, pagerScroll: pagerScroll)
+        updateSelectedBarPosition(animated, swipeDirection: swipeDirection, pagerScroll: pagerScroll, minimumWidth: minimumWidth)
     }
 
     open func move(fromIndex: Int, toIndex: Int, progressPercentage: CGFloat, pagerScroll: PagerScroll) {
@@ -113,7 +113,7 @@ open class ButtonBarView: UICollectionView {
         setContentOffset(CGPoint(x: targetContentOffset < 0 ? 0: targetContentOffset, y: 0), animated: false)
     }
 
-    open func updateSelectedBarPosition(_ animated: Bool, swipeDirection: SwipeDirection, pagerScroll: PagerScroll) {
+    open func updateSelectedBarPosition(_ animated: Bool, swipeDirection: SwipeDirection, pagerScroll: PagerScroll, minimumWidth: CGFloat? = nil) {
         var selectedBarFrame = selectedBar.frame
 
         let selectedCellIndexPath = IndexPath(item: selectedIndex, section: 0)
@@ -124,6 +124,12 @@ open class ButtonBarView: UICollectionView {
 
         selectedBarFrame.size.width = selectedCellFrame.size.width
         selectedBarFrame.origin.x = selectedCellFrame.origin.x
+        
+        if let minimumWidth = minimumWidth,
+            selectedBarFrame.width - minimumWidth > 0 {
+            selectedBarFrame.size.width = minimumWidth
+            selectedBarFrame.origin.x = selectedBarFrame.origin.x + (selectedCellFrame.size.width - minimumWidth) / 2.0
+        }
 
         if animated {
             UIView.animate(withDuration: 0.3, animations: { [weak self] in
