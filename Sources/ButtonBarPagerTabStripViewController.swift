@@ -82,6 +82,8 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
     lazy private var cachedCellWidths: [CGFloat]? = { [unowned self] in
         return self.calculateWidths()
     }()
+    
+    public var isSelectedAnimation: Bool = true
 
     override public init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -284,7 +286,7 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
     open func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard indexPath.item != currentIndex else { return }
 
-        buttonBarView.moveTo(index: indexPath.item, animated: true, swipeDirection: .none, pagerScroll: .yes, minimumWidth: calculateMinimumWidth(index: indexPath.item))
+        buttonBarView.moveTo(index: indexPath.item, animated: isSelectedAnimation, swipeDirection: .none, pagerScroll: .yes, minimumWidth: calculateMinimumWidth(index: indexPath.item))
         shouldUpdateButtonBarView = false
 
         let oldIndexPath = IndexPath(item: currentIndex, section: 0)
@@ -301,7 +303,7 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
                 changeCurrentIndex(cells.first!, cells.last!, true)
             }
         }
-        moveToViewController(at: indexPath.item)
+        moveToViewController(at: indexPath.item, animated: isSelectedAnimation)
     }
 
     // MARK: - UICollectionViewDataSource
