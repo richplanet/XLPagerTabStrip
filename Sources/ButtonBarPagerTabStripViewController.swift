@@ -76,7 +76,8 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
 
     public var changeCurrentIndex: ((_ oldCell: ButtonBarViewCell?, _ newCell: ButtonBarViewCell?, _ animated: Bool) -> Void)?
     public var changeCurrentIndexProgressive: ((_ oldCell: ButtonBarViewCell?, _ newCell: ButtonBarViewCell?, _ progressPercentage: CGFloat, _ changeCurrentIndex: Bool, _ animated: Bool) -> Void)?
-
+    public var buttonBarViewDidSelectItemClosure: ((_ oldIdex: Int, _ newIndex: Int) -> Void)?  // buttonBarView item 터치 시 호출
+    
     @IBOutlet public weak var buttonBarView: ButtonBarView!
 
     lazy private var cachedCellWidths: [CGFloat]? = { [unowned self] in
@@ -303,6 +304,11 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
                 changeCurrentIndex(cells.first!, cells.last!, true)
             }
         }
+        
+        if let buttonBarViewDidSelectItemClosure = buttonBarViewDidSelectItemClosure {
+            buttonBarViewDidSelectItemClosure(currentIndex, indexPath.item)
+        }
+        
         moveToViewController(at: indexPath.item, animated: isSelectedAnimation)
     }
 
