@@ -213,6 +213,24 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
         cachedCellWidths = calculateWidths()
         buttonBarView.moveTo(index: currentIndex, animated: false, swipeDirection: .none, pagerScroll: .yes, minimumWidth: calculateMinimumWidth(index: currentIndex))
     }
+    
+    // set bottonBarView section inset
+    open func setButtonBarSectionInset(left: CGFloat?, right: CGFloat?) {
+        if let flowLayout = buttonBarView.collectionViewLayout as? UICollectionViewFlowLayout {
+            let sectionInset = flowLayout.sectionInset
+            let leftInset = left ?? sectionInset.left
+            let rightInset = right ?? sectionInset.right
+            
+            flowLayout.sectionInset = UIEdgeInsets(top: sectionInset.top,
+                                                   left: leftInset,
+                                                   bottom: sectionInset.bottom,
+                                                   right: rightInset)
+            
+            // 필요 없어 보이지만 변경은 해둠.
+            settings.style.buttonBarLeftContentInset = leftInset
+            settings.style.buttonBarRightContentInset = rightInset
+        }
+    }
 
     open func calculateStretchedCellWidths(_ minimumCellWidths: [CGFloat], suggestedStretchedCellWidth: CGFloat, previousNumberOfLargeCells: Int) -> CGFloat {
         var numberOfLargeCells = 0
