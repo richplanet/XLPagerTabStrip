@@ -336,6 +336,11 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
             updateContent()
         }
     }
+    
+    open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {}
+    open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {}
+    open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {}
+    open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {}
 
     // MARK: - Orientation
 
