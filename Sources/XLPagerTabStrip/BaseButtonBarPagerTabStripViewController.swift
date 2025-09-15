@@ -31,6 +31,8 @@ open class BaseButtonBarPagerTabStripViewController<ButtonBarCellType: UICollect
     public var buttonBarItemSpec: ButtonBarItemSpec<ButtonBarCellType>!
     public var changeCurrentIndex: ((_ oldCell: ButtonBarCellType?, _ newCell: ButtonBarCellType?, _ animated: Bool) -> Void)?
     public var changeCurrentIndexProgressive: ((_ oldCell: ButtonBarCellType?, _ newCell: ButtonBarCellType?, _ progressPercentage: CGFloat, _ changeCurrentIndex: Bool, _ animated: Bool) -> Void)?
+    public var buttonBarViewDidSelectItemClosure: ((_ oldIdex: Int, _ newIndex: Int) -> Void)?  // buttonBarView item 터치 시 호출
+    public var buttonBarViewDuplicateSelectItemClosure: ((Int) -> Void)?    // buttonBarView item 중복 선택시 호출
 
     @IBOutlet public weak var buttonBarView: ButtonBarView!
 
@@ -204,7 +206,10 @@ open class BaseButtonBarPagerTabStripViewController<ButtonBarCellType: UICollect
     }
 
     open func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard indexPath.item != currentIndex else { return }
+        guard indexPath.item != currentIndex else {
+            buttonBarViewDuplicateSelectItemClosure?(indexPath.item)
+            return
+        }
 
         buttonBarView.moveTo(index: indexPath.item, animated: true, swipeDirection: .none, pagerScroll: .yes)
         shouldUpdateButtonBarView = false
@@ -220,6 +225,11 @@ open class BaseButtonBarPagerTabStripViewController<ButtonBarCellType: UICollect
                 changeCurrentIndex(oldCell, newCell, true)
             }
         }
+        
+        if let buttonBarViewDidSelectItemClosure = buttonBarViewDidSelectItemClosure {
+            buttonBarViewDidSelectItemClosure(currentIndex, indexPath.item)
+        }
+        
         moveToViewController(at: indexPath.item)
     }
 
